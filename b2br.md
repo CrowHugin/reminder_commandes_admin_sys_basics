@@ -73,3 +73,11 @@
 
 ## Virt - manager
 périphérique : e1000e
+
+`<seclabel type='none'/>` doit etre rajouter a l'avant derniere ligne entre: `</devices>` et `</domain>`
+such as :
+```
+  </devices>
+  <seclabel type='none'/>
+</domain>
+```
