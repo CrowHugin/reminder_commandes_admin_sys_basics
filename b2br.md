@@ -81,3 +81,13 @@ such as :
   <seclabel type='none'/>
 </domain>
 ```
+doit etre rajouter entre `<mac adresse=` et `model type='virtio'`
+ceci sert a creer un pont entre l'hote et la machine'
+
+```
+<portForward proto="tcp">
+    <range start="4242" to="4242"/>
+</portForward>
+```
+
+
