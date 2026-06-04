@@ -38,6 +38,7 @@
 | sudo usermod -aG *login* *group*   | ajoute un user à un groupe sans écraser ses groupes actuels         |          |
 | sudo addgroup                      | Créer un nouveau groupe vide                                        |          |
 
+
 ## Mot de passe
 
 
@@ -49,6 +50,7 @@
 | PASS_MAX_DAYS   30      # Le mot de passe expire après 30 jours<br>PASS_MIN_DAYS   2       # Délai minimal avant de pouvoir changer à nouveau<br>PASS_WARN_AGE   7       # Alerte l'utilisateur 7 jours avant l'expiration | changer ces paramètres dans le /etc/login.defs pour servir de template aux nouveaux utilisateurs.<br>pour ceux existant, voir la commande ci-dessus |                                                                                                                |
 | sudo apt update && sudo apt install libpam-pwquality -y                                                                                                                                                                    | install le module pour vérifier la qualitée du password                                                                                             |                                                                                                                |
 | password        requisite                       pam_pwquality.so retry=3 minlen=10 ucredit=-1 lcredit=-1 dcredit=-1 maxrepeat=3 reject_username difok=7 enforce_for_root                                                   | remplacer: password        requisite                       pam_pwquality.so retry=3                                                                 | à faire /etc/pam.d/common-password                                                                             |
+
 ## SSH
 
 | Commande                                 | effet                             | contexte                                |
@@ -60,6 +62,7 @@
 | PermitRootLogin no                       | # Interdire la connexion en root  | à modifier dans le /etc/ssh/sshd_config |
 | sudo systemctl restart ssh               | restart le service                |                                         |
 
+
 ## Firewall
 
 | commande                           | effet                                         | contexte |
@@ -70,6 +73,17 @@
 | sudo ufw allow 4242                | Ouvrir le port 4242                           |          |
 | sudo ufw enable                    | enable the firewall                           |          |
 | sudo ufw status verbose            | pour checker le status du firewall            |          |
+
+
+## Hostname
+
+
+| commande                           | effet                                         | contexte |
+| ---------------------------------- | --------------------------------------------- | -------- |
+| hostnamectl                               | Affiche les informations importantes sur la vm|          |
+| sudo hostnamectl set-hostname nouveau-nom | Change le hostname                            |          |
+| sudo vim /etc/hosts                       | ouvre le fichier de config des hosts          |          |
+
 
 ## Virt - manager
 périphérique : e1000e
