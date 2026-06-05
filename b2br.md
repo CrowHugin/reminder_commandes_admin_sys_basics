@@ -84,6 +84,75 @@
 | sudo hostnamectl set-hostname nouveau-nom | Change le hostname                            |          |
 | sudo vim /etc/hosts                       | ouvre le fichier de config des hosts          |          |
 
+## AppArmor
+
+
+| commande                                                                       | effet                            | contexte                   |
+| ------------------------------------------------------------------------------ | -------------------------------- | -------------------------- |
+| GRUB_CMDLINE_LINUX_DEFAULT="quiet splash apparmor=1 lsm=apparmor"              | enable AppArmor au démarrage     | sudo vim /etc/default/grub |
+| sudo systemctl enable apparmor<br>sudo systemctl start apparmor<br>sudo reboot | Activer le service et redémarrer |                            |
+| sudo aa-status                                                                 | Vérifier le status du service    |                            |
+
+## Script pour infos basiques
+```
+#!/bin/bash
+
+ARCH=$(uname -a)
+CPU_PHYS=$(grep "physical id" /proc/cpuinfo | sort -u | wc -l)
+vCPU=$(grep "processor" /proc/cpuinfo | wc -l)
+RAM_TOTAL=$(free -m | awk '$1 == "Mem:" {print $2}')
+RAM_USE=$(free -m | awk '$1 == "Mem:" {print $3}')
+RAM_PCT=$(free | awk '$1 == "Mem:" {printf("%.2f"), $3/$2*100}')
+DISK_TOTAL=$(df -Bg | grep '^/dev/' | grep -v '/boot$' | awk '{fd += $2} END {print fd}')
+DISK_USE=$(df -Bm | grep '^/dev/' | grep -v '/boot$' | awk '{ud += $3} END {print ud}')
+DISK_PCT=$(df -Bm | grep '^/dev/' | grep -v '/boot$' | awk '{ud += $3; fd += $2} END {printf("%d"), ud/fd*100}')
+CPU_LOAD=$(vmstat 1 2 | tail -1 | awk '{print 100 - $15}')
+LAST_BOOT=$(who -b | awk '{print $3 " " $4}')
+LVM_COUNT=$(lsblk | grep "lvm" | wc -l)
+LVM_STATUS=$(if [ $LVM_COUNT -gt 0 ]; then echo "yes"; else echo "no"; fi)
+TCP_CONN=$(ss -t | grep -i "estab" | wc -l)
+USER_LOG=$(users | wc -w)
+IP_ADDR=$(hostname -I | awk '{print $1}')
+MAC_ADDR=$(ip link show | grep "link/ether" | awk '{print $2}')
+SUDO_COUNT=$(journalctl _COMM=sudo 2>/dev/null | grep "COMMAND=" | wc -l)
+
+wall << EOF
+	#Architecture: $ARCH
+	#CPU physical : $CPU_PHYS
+	#vCPU : $vCPU
+	#Memory Usage: $RAM_USE/${RAM_TOTAL}MB ($RAM_PCT%)
+	#Disk Usage: $DISK_USE/${DISK_TOTAL}Gb ($DISK_PCT%)
+	#CPU load : $CPU_LOAD%
+	#Last boot : $LAST_BOOT
+	#LVM use : $LVM_STATUS
+	#Connections TCP : $TCP_CONN ESTABLISHED
+	#User log : $USER_LOG
+	#Network : IP $IP_ADDR ($MAC_ADDR)
+	#Sudo : $SUDO_COUNT cmd
+EOF
+```
+
+`chmod +x monitoring.sh`
+
+
+| commandes               | infos                                                                                                                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `awk`<br>               | Permet de découper une ligne en colonnes. Par exemple, `$2` signifie "deuxième colonne".                                                                                                         |
+| `wc -l`                 | Compte le nombre de lignes (Word Count `-l`ines). Très utile pour compter les processeurs, connexions, ou utilisateurs.                                                                          |
+| `grep -v`               | Le drapeau `-v` permet d'**exclure** un mot. (Exemple : `grep -v '/boot$'` exclut la partition de boot pour ne pas fausser le calcul du stockage).                                               |
+| `journalctl _COMM=sudo` | C'est la méthode moderne et propre sous Debian pour compter les exécutions de `sudo` à partir des journaux système, évitant ainsi les erreurs si les fichiers de logs classiques n'existent pas. |
+### Cron
+
+
+| commandes                                                                                     | infos                                                                           |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| sudo crontab -e                                                                               | ouvre le fichier de conf de crontab                                             |
+| @reboot /chemin/complet/vers/monitoring.sh<br>*/10 * * * * /chemin/complet/vers/monitoring.sh | ajout de ces deux lignes pour le lancer au démarrage et toutes les deux minutes |
+| sudo service cron stop                                                                        | stop le script sans le modifier                                                 |
+| sudo service cron start                                                                       | lance le script sans le modifier                                                |
+
+
+
 
 ## Virt - manager
 périphérique : e1000e
