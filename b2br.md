@@ -173,4 +173,7 @@ ceci sert a creer un pont entre l'hote et la machine'
 </portForward>
 ```
 
+a mettre apres le `<model type ="virtio"/>`
+```<backend type="passt"/>```
+
 
